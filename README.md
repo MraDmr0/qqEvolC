@@ -68,7 +68,7 @@ The executable outputs, at each time step saved, the following data:
 * wavefunction of each energy level
 
 ## Utilities
-The package includes a python scripts that allows to easily plot the occupation probability and the envelope shape as a function of time.
+The package includes a Python script "Plot.py" that allows to easily plot the occupation probability and the envelope shape as a function of time.
 
 ## Next developements
 The current Ver. 1.0 implements the basic functions of the package. However, the code and the repository can be further developed from many points of view:
