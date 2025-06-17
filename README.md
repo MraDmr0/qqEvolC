@@ -17,13 +17,12 @@ The current version supports the following envelope functions (for further detai
 
 ## Use
 The source code can be compiled trough the existing Makefile by running the command:
-```math
+
 $ make.
-```
+
 This will produce the executable "main" that than can be used as:
-```math
+
 $ ./main input > output.
-```
 
 ! Note on Ver. 1.0: currently, the Makefile only supports the GNU (g++) compiler. Different compilers can be easily integrated in the existing Makefile. 
 
