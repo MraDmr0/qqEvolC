@@ -26,7 +26,7 @@ $ ./main input > output.
 
 ! Note on Ver. 1.0: currently, the Makefile only supports the GNU (g++) compiler. Different compilers can be easily integrated in the existing Makefile. 
 
-## Input descriprion
+## Input description
 The input parameters can be specified in a JSON file. You need to specify a set of mandatory data needed to charaterize the basic system that you want to simulate, while the need for optional parameters depend on the choiche of the envelope function.
 
 The input parameters can be specified in a JSON file. You need to specify a set of mandatory data needed to charaterize the basic system that you want to simulate, while the need for optional parameters depend on the choiche of the envelope function.
@@ -68,7 +68,7 @@ The executable outputs, at each time step saved, the following data:
 * wavefunction of each energy level
 
 ## Utilities
-The package includes a Python script "Plot.py" that allows to easily plot the occupation probability and the envelope shape as a function of time.
+The package includes a Python script "Plot.py" that allows to easily plot the occupation probability and the envelope shape as a function of time. Cuurrently only supports the visualization up to four-levels.
 
 ## Next developements
 The current Ver. 1.0 implements the basic functions of the package. However, the code and the repository can be further developed from many points of view:
