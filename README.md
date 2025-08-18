@@ -80,10 +80,7 @@ The current Ver. 1.0 implements the basic functions of the package. However, the
 * The python script is simple and only works up to four levels, this needs to be generalized
 * The code was initially thought to implement also "qb_mode = on" to accept input parameters in a different form for the special case of a two-levels system
 
-## Bugs
-* Currently, even with envelope potential set to "off" it is required to specify a value for the variable "w1"
-
 ## Other informations
 This code follows the Python version "Evoluzione.py" (https://github.com/MraDmr0/Evoluzione), which however lacks input and error handling. Moreover, the Python implementation is sevearly constrained by the computational performances offered by the language. Another Python version which leverages the Numba package for performance enhancements is under developement.
 
-Mario Di Mare, 17/06/2025
+Mario Di Mare, 18/08/2025
