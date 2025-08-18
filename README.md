@@ -68,10 +68,11 @@ The executable outputs, at each time step saved, the following data:
 * wavefunction of each energy level
 
 ## Utilities
-The package includes a Python script "Plot.py" that allows to easily plot the occupation probability and the envelope shape as a function of time. Cuurrently only supports the visualization up to four-levels.
+The package includes a Python script "Plot.py" that allows to easily plot the occupation probability and the envelope shape as a function of time.
 
 ## Next developements
 The current Ver. 1.0 implements the basic functions of the package. However, the code and the repository can be further developed from many points of view:
+* The code can be easily extended to support more energy levels
 * Overall the code should be better organized and commentend to become more user and developer friendly
 * A reorganization of the code should also aim to an enhancement of the performances, even with multi-thread parallelizzation if worth
 * The code can be extended by implementing more envelope functions or different potentials
@@ -79,7 +80,10 @@ The current Ver. 1.0 implements the basic functions of the package. However, the
 * The python script is simple and only works up to four levels, this needs to be generalized
 * The code was initially thought to implement also "qb_mode = on" to accept input parameters in a different form for the special case of a two-levels system
 
+## Bugs
+* Currently, even with envelope potential set to "off" it is required to specify a value for the variable "w1"
+
 ## Other informations
-This code follows the previously released Python version "Evoluzione.py" (https://github.com/MraDmr0/Evoluzione), which however lacks input and error handling. Moreover, the Python implementation is sevearly constrained by the computational performances offered by the language. Another Python version which leverages the Numba package for performance enhancements is under developement.
+This code follows the Python version "Evoluzione.py" (https://github.com/MraDmr0/Evoluzione), which however lacks input and error handling. Moreover, the Python implementation is sevearly constrained by the computational performances offered by the language. Another Python version which leverages the Numba package for performance enhancements is under developement.
 
 Mario Di Mare, 17/06/2025
