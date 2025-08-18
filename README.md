@@ -1,5 +1,5 @@
-# DLevelsQuantumEvol (Ver. 1.0)
-Package to simulate the time evolution of a D-levels quantum system under the influence of a scalar potential.
+# qqEvolC (Ver. 1.0)
+Package to simulate the time evolution of a 4-level quantum system under the influence of a scalar potential.
 
 ## Description
 This package implements a C++ version of the Runge-Kutta fourth order algorithm to integrate the time-dependent Schrodinger equation. 
