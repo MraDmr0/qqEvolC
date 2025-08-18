@@ -279,6 +279,17 @@ int main(int argc, char* argv[])
     std::string envelope = input["envelope"];
     int dimension        = input["Dstates"];
 
+    //special case for envelope = "off"
+    if (envelope == "off")
+    {
+       std::vector<double> wl(dimension);
+       std::vector<std::vector<double>> wr(dimension, std::vector<double>(dimension));
+
+        input["w1"] = 0;
+        input["wr"] = wr;
+        input["wl"] = wl;
+
+    }
 
     //map of qbmodes algorithms
     std::unordered_map<std::string, SimulationFunction> qbmodes = 
@@ -291,11 +302,11 @@ int main(int argc, char* argv[])
     std::unordered_map<std::string, std::pair<EnvelopeFunction, std::vector<FieldRequirement>>> envelopes = 
     {
         {"off",     {off, {}}},
-        {"const",   {constant, {{"F1", FLOAT}}}},
-        {"impulse", {impulse, {{"F1", FLOAT},{"t1", FLOAT},{"t2", FLOAT}}}},
-        {"gauss" ,  {gauss, {{"F1", FLOAT}, {"t1", FLOAT}, {"sigma1", FLOAT} }}},
-        {"double_impulse", {double_impulse, {{"F1", FLOAT},{"t1", FLOAT},{"t2", FLOAT},{"w2", FLOAT},{"t3", FLOAT},{"t4", FLOAT},{"F2",FLOAT}}}},
-        {"double_gauss", {double_gauss, {{"F1", FLOAT},{"t1", FLOAT},{"w2", FLOAT},{"F2",FLOAT},{"sigma2", FLOAT}}}}
+        {"const",   {constant, {{"F1", FLOAT}, {"wl", ARRAY}, {"wr", MATRIX}, {"w1", FLOAT}}}},
+        {"impulse", {impulse, {{"F1", FLOAT}, {"wl", ARRAY}, {"wr", MATRIX}, {"w1", FLOAT},{"t1", FLOAT},{"t2", FLOAT}}}},
+        {"gauss" ,  {gauss, {{"F1", FLOAT}, {"wl", ARRAY}, {"wr", MATRIX}, {"w1", FLOAT}, {"t1", FLOAT}, {"sigma1", FLOAT} }}},
+        {"double_impulse", {double_impulse, {{"F1", FLOAT}, {"wl", ARRAY}, {"wr", MATRIX}, {"w1", FLOAT},{"t1", FLOAT},{"t2", FLOAT},{"w2", FLOAT},{"t3", FLOAT},{"t4", FLOAT},{"F2",FLOAT}}}},
+        {"double_gauss", {double_gauss, {{"F1", FLOAT}, {"wl", ARRAY}, {"wr", MATRIX}, {"w1", FLOAT},{"t1", FLOAT},{"w2", FLOAT},{"F2",FLOAT},{"sigma2", FLOAT}}}}
 
     };
 
@@ -320,7 +331,7 @@ int main(int argc, char* argv[])
     {
         {"prefix", STRING}, {"qbmode", STRING}, {"envelope", STRING},
         {"Dstates", INT}, {"ti", FLOAT}, {"tf", FLOAT},
-        {"Nstep", INT}, {"Nprint", INT}, {"psi", ARRAY}, {"wl", ARRAY}, {"wr", MATRIX}, {"w1", FLOAT}
+        {"Nstep", INT}, {"Nprint", INT}, {"psi", ARRAY}
     };
 
     //allowed dimensions
@@ -370,3 +381,4 @@ int main(int argc, char* argv[])
     qbmodes[qbmode](input,  potentials[potential], envelopes[envelope].first);
     return 0;
 }
+
