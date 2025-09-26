@@ -3,12 +3,15 @@
 #include <cmath>
 #include <functional>
 #include <iostream>
+#include <fstream>
+#include <string>
 #include "algorithms.h"
 
 //executes RK4 simulation for qbmode = off
 void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction envelope) 
 {
     //Assign base input data to local variables
+    std::string prefix = input["prefix"];
     int Nstep    = input["Nstep"];
     int D        = input["Dstates"];
     int Nprint   = input["Nprint"];
@@ -81,11 +84,11 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
     }
 
     //allocate output time and envelope array
-    double* tOut = new double[Nsave];
-    double* envOut = new double [Nsave];
+    double* tOut = new double[Nsave+1];
+    double* envOut = new double [Nsave+1];
     for (int k = 0; k < D; k++)
     {
-        psiOut[k] = new std::complex<double>[Nsave];
+        psiOut[k] = new std::complex<double>[Nsave+1];
     }
     
     //initialize arrays
@@ -186,6 +189,11 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
         // Save every Nprint
         if (i % Nprint == 0 || i == Nstep) 
         {
+        if (idx >= Nsave) {
+            std::cerr << "ERROR: idx=" << idx << " >= Nsave=" << Nsave << "\n";
+            std::abort();
+        }
+
             for (int j = 0; j < D; ++j) 
             {
                 psiOut[j][idx] = psiPrev[j];
@@ -196,16 +204,71 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
         }
 
     }
+
+    std::cout << "Calculation completed...\n";
+
+    std::cout << "Writing output file...\n";
+
+
+
+    std::string outfile = prefix + ".txt"; 
+
+
     //print out result
-    for (int i = 0; i < Nsave; i++)
-    {
-        std::cout << tOut[i]<<" " << envOut[i] << " ";
-        for (int k = 0; k < D; k++)
-        {
-            std::cout << real( psiOut[k][i]) << "+" << imag( psiOut[k][i]) << "j"<< " ";
+    FILE* f = std::fopen(outfile.c_str(), "w");
+if (!f) { std::cerr<<"fopen failed\n"; }
+else {
+    for (int i = 0; i < Nsave; ++i) {
+        std::fprintf(f, "%g %g ", tOut[i], envOut[i]);
+        for (int k = 0; k < D; ++k) {
+            std::fprintf(f, "%g+%gj ", std::real(psiOut[k][i]), std::imag(psiOut[k][i]));
         }
-        std::cout << "\n";
+        std::fprintf(f, "\n");
     }
+    std::fclose(f);
+}
+
+
+    std::cout << "Output file written correctly...\n";
+
+
+
+    // std::cerr << outfile << "\n";
+
+    // std::ofstream write_output(outfile);
+    
+    // std::cerr << write_output.is_open() << "\n";
+
+    // if (!write_output.is_open()) {
+    //     std::cerr << "Error: could not open " << outfile << " for writing." << std::endl;
+    // }
+
+    // std::cerr << "Writing \n";
+
+
+    // for (int i = 0; i < Nsave; i++) {
+    //     write_output << tOut[i] << " " << envOut[i] << " ";
+    //     for (int k = 0; k < D; k++) {
+    //         write_output << std::real(psiOut[k][i]) 
+    //                     << "+" 
+    //                     << std::imag(psiOut[k][i]) 
+    //                     << "j ";
+    //     }
+    //     write_output << "\n";
+    // }
+    // write_output.flush();
+
+    // write_output.close();
+
+    //  for (int i = 0; i < Nsave; i++)
+    //  {
+    //      std::cout << tOut[i]<<" " << envOut[i] << " ";
+    //      for (int k = 0; k < D; k++)
+    //      {
+    //          std::cout << real( psiOut[k][i]) << "+" << imag( psiOut[k][i]) << "j"<< " ";
+    //      }
+    //      std::cout << "\n";
+    //  }
 
     //Erase dynamically allocated memory
     delete [] t;
@@ -235,6 +298,9 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
     delete[] env2;
 
 }
+
+
+
 
 
 
