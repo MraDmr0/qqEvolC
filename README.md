@@ -1,5 +1,5 @@
-# qqEvolC (Ver. 1.0)
-Package to simulate the time evolution of a 4-level quantum system under the influence of a scalar potential.
+# qqEvolC (Ver. 1.1)
+Package to simulate the time evolution of a D-level quantum system under the influence of a scalar potential.
 
 ## Description
 This package implements a C++ version of the Runge-Kutta fourth order algorithm to integrate the time-dependent Schrodinger equation. 
@@ -22,16 +22,15 @@ $ make.
 
 This will produce the executable "main" that than can be used as:
 
-$ ./main input > output.
+$ ./main input.json > output.
 
-! Note on Ver. 1.0: currently, the Makefile only supports the GNU (g++) compiler. Different compilers can be easily integrated in the existing Makefile. 
+! Note: currently, the Makefile only supports the GNU (g++) compiler. Different compilers can be easily integrated in the existing Makefile. 
 
 ## Input description
 The input parameters can be specified in a JSON file. You need to specify a set of mandatory data needed to charaterize the basic system that you want to simulate, while the need for optional parameters depend on the choiche of the envelope function.
 
-The input parameters can be specified in a JSON file. You need to specify a set of mandatory data needed to charaterize the basic system that you want to simulate, while the need for optional parameters depend on the choiche of the envelope function.
-
 ### Mandatory parameters
+* prefix                = results will be saved in "prefix.txt"
 * D                     = number of energy levels
 * ti                    = initial time ($\mu s$)
 * tf                    = final time ($\mu s$)
@@ -62,25 +61,29 @@ The input parameters can be specified in a JSON file. You need to specify a set 
 * sigma2           = spreading of the second gaussian impulse
 
 ## Output description
-The executable outputs, at each time step saved, the following data:
+The executable outputs the file "prefox.txt" which containes:
 * time ($\mu s$)
 * value of envelope funcion
 * wavefunction of each energy level
+
+other informations on the state of the execution and the runtime are printed on console.
 
 ## Utilities
 The package includes a Python script "Plot.py" that allows to easily plot the occupation probability and the envelope shape as a function of time.
 
 ## Next developements
-The current Ver. 1.0 implements the basic functions of the package. However, the code and the repository can be further developed from many points of view:
-* The code can be easily extended to support more energy levels
+The current Ver. 1.1 implements the basic functions of the package. However, the code and the repository can be further developed from many points of view:
 * Overall the code should be better organized and commentend to become more user and developer friendly
 * A reorganization of the code should also aim to an enhancement of the performances, even with multi-thread parallelizzation if worth
 * The code can be extended by implementing more envelope functions or different potentials
 * The repository lacks practical examples which need to be included
-* The python script is simple and only works up to four levels, this needs to be generalized
 * The code was initially thought to implement also "qb_mode = on" to accept input parameters in a different form for the special case of a two-levels system
 
 ## Other informations
 This code follows the Python version "Evoluzione.py" (https://github.com/MraDmr0/Evoluzione), which however lacks input and error handling. Moreover, the Python implementation is sevearly constrained by the computational performances offered by the language. Another Python version which leverages the Numba package for performance enhancements is under developement.
 
-Mario Di Mare, 18/08/2025
+## New features of Ver 1.1
+* The code now saves the results on a text file
+* The code can be now applied to any number of energy levels D
+
+Mario Di Mare, 26/09/2025
