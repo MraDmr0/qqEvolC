@@ -18,11 +18,11 @@ The current version supports the following envelope functions (for further detai
 ## Use
 The source code can be compiled trough the existing Makefile by running the command:
 
-$ make.
+$ make
 
 This will produce the executable "main" that than can be used as:
 
-$ ./main input.json > output.
+$ ./main input.json > output
 
 ! Note: currently, the Makefile only supports the GNU (g++) compiler. Different compilers can be easily integrated in the existing Makefile. 
 
@@ -69,7 +69,9 @@ The executable outputs the file "prefox.txt" which containes:
 other informations on the state of the execution and the runtime are printed on console.
 
 ## Utilities
-The package includes a Python script "Plot.py" that allows to easily plot the occupation probability and the envelope shape as a function of time.
+The package includes a Python script "Plot.py" that allows to easily plot the occupation probability and the envelope shape as a function of time. When executing it, it is necessary to specify the same prefix of the input file:
+
+$python plot.py prefix
 
 ## Next developements
 The current Ver. 1.1 implements the basic functions of the package. However, the code and the repository can be further developed from many points of view:
@@ -79,11 +81,11 @@ The current Ver. 1.1 implements the basic functions of the package. However, the
 * The repository lacks practical examples which need to be included
 * The code was initially thought to implement also "qb_mode = on" to accept input parameters in a different form for the special case of a two-levels system
 
-## Other informations
-This code follows the Python version "Evoluzione.py" (https://github.com/MraDmr0/Evoluzione), which however lacks input and error handling. Moreover, the Python implementation is sevearly constrained by the computational performances offered by the language. Another Python version which leverages the Numba package for performance enhancements is under developement.
-
 ## New features of Ver 1.1
 * The code now saves the results on a text file
 * The code can be now applied to any number of energy levels D
+
+## Other informations
+This code follows the Python version "Evoluzione.py" (https://github.com/MraDmr0/Evoluzione), which however lacks input and error handling. Moreover, the Python implementation is sevearly constrained by the computational performances offered by the language. Another Python version which leverages the Numba package for performance enhancements is under developement.
 
 Mario Di Mare, 26/09/2025
