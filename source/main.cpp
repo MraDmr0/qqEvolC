@@ -3,12 +3,18 @@
 //D-state quantum system 
 //under an external potential
 
+//main executable of qqEvol package 
+//to simulate time evolution of 
+//D-state quantum system 
+//under an external potential
+
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
 #include <vector>
 #include <string>
 #include <complex>
+#include <ctime>
 #include "json.hpp"
 #include "algorithms.h"
 #include "potentials.h"
@@ -113,7 +119,7 @@ bool validateFields(const json& input, const std::vector<FieldRequirement>& fiel
             //check dimensions and type of elements of "psi"
             if (field.name == "psi") 
             {
-                if (val.size() != D) 
+                if ((int)(val.size()) != D) 
                 {
                     std::cerr << "Wrong size '" << val.size() << "' for array '" << field.name
                               << ", expected '" << D << "'!\n";
@@ -148,7 +154,7 @@ bool validateFields(const json& input, const std::vector<FieldRequirement>& fiel
             }
             else if (input["qbmode"] == "off") 
             {
-                if (val.size() != D) 
+                if ((int)(val.size()) != D) 
                 {
                     std::cerr << "Wrong size '" << val.size() << "' for array '" << field.name
                               << "', expected '" << D << "'!\n";
@@ -168,7 +174,7 @@ bool validateFields(const json& input, const std::vector<FieldRequirement>& fiel
         //special case for matrix data
         if (field.type == MATRIX) 
         {
-            if (val.size() != D) 
+            if ((int)(val.size()) != D) 
             {
                 std::cerr << "Wrong number of rows '" << val.size() << "' for matrix '" << field.name
                               << "', expected '" << D << "'!\n";
@@ -177,7 +183,7 @@ bool validateFields(const json& input, const std::vector<FieldRequirement>& fiel
             }
             for (const auto& row : val) 
             {
-                if (!row.is_array() || row.size() != D) 
+                if (!row.is_array() || (int)(row.size()) != D) 
                 {
                     std::cerr << "Wrong number of columns '" << row.size() << "' for matrix '" << field.name
                               << "', expected '" << D << "'!\n";
@@ -187,6 +193,7 @@ bool validateFields(const json& input, const std::vector<FieldRequirement>& fiel
                 {
                     if (!item.is_number()) 
                     {
+
                         std::cerr << "Wrong type '" << getTypeName(item) << "' for elements of matrix '" << field.name << "', expected 'number'!\n";
                         return false;
                     }
@@ -211,12 +218,21 @@ std::vector<FieldRequirement> mergeFields(
 
 int main(int argc, char* argv[]) 
 {
+
+    time_t timestamp;
+    time(&timestamp);
+    std::cout << "qqEvol execution started: " << ctime(&timestamp) << "\n";
+
+
     //check if input file exists
     if (argc < 2) 
     {
         std::cerr << "Missing mandatory argument: json input data file!\n";
         return 1;
     }
+
+    std::cout << "Opening input file...\n";
+
     //check if input file can be opened
     std::ifstream file(argv[1]);
     if (!file) 
@@ -229,6 +245,9 @@ int main(int argc, char* argv[])
     file >> input;
     //next checks are needed to determine which are the optional input data
     //check if qbmode is specified in input file
+
+    std::cout << "Checking input data...\n";
+
     if (!input.contains("qbmode"))
     {
         std::cerr << "Missing mandatory input data 'qbmode' of type 'string'!\n";
@@ -277,19 +296,8 @@ int main(int argc, char* argv[])
     //assign qbmode, envelope, Dstates to local variables
     std::string qbmode   = input["qbmode"];
     std::string envelope = input["envelope"];
-    int dimension        = input["Dstates"];
+    //int dimension        = input["Dstates"];
 
-    //special case for envelope = "off"
-    if (envelope == "off")
-    {
-       std::vector<double> wl(dimension);
-       std::vector<std::vector<double>> wr(dimension, std::vector<double>(dimension));
-
-        input["w1"] = 0;
-        input["wr"] = wr;
-        input["wl"] = wl;
-
-    }
 
     //map of qbmodes algorithms
     std::unordered_map<std::string, SimulationFunction> qbmodes = 
@@ -302,11 +310,11 @@ int main(int argc, char* argv[])
     std::unordered_map<std::string, std::pair<EnvelopeFunction, std::vector<FieldRequirement>>> envelopes = 
     {
         {"off",     {off, {}}},
-        {"const",   {constant, {{"F1", FLOAT}, {"wl", ARRAY}, {"wr", MATRIX}, {"w1", FLOAT}}}},
-        {"impulse", {impulse, {{"F1", FLOAT}, {"wl", ARRAY}, {"wr", MATRIX}, {"w1", FLOAT},{"t1", FLOAT},{"t2", FLOAT}}}},
-        {"gauss" ,  {gauss, {{"F1", FLOAT}, {"wl", ARRAY}, {"wr", MATRIX}, {"w1", FLOAT}, {"t1", FLOAT}, {"sigma1", FLOAT} }}},
-        {"double_impulse", {double_impulse, {{"F1", FLOAT}, {"wl", ARRAY}, {"wr", MATRIX}, {"w1", FLOAT},{"t1", FLOAT},{"t2", FLOAT},{"w2", FLOAT},{"t3", FLOAT},{"t4", FLOAT},{"F2",FLOAT}}}},
-        {"double_gauss", {double_gauss, {{"F1", FLOAT}, {"wl", ARRAY}, {"wr", MATRIX}, {"w1", FLOAT},{"t1", FLOAT},{"w2", FLOAT},{"F2",FLOAT},{"sigma2", FLOAT}}}}
+        {"const",   {constant, {{"F1", FLOAT}}}},
+        {"impulse", {impulse, {{"F1", FLOAT},{"t1", FLOAT},{"t2", FLOAT}}}},
+        {"gauss" ,  {gauss, {{"F1", FLOAT}, {"t1", FLOAT}, {"sigma1", FLOAT} }}},
+        {"double_impulse", {double_impulse, {{"F1", FLOAT},{"t1", FLOAT},{"t2", FLOAT},{"w2", FLOAT},{"t3", FLOAT},{"t4", FLOAT},{"F2",FLOAT}}}},
+        {"double_gauss", {double_gauss, {{"F1", FLOAT},{"t1", FLOAT},{"w2", FLOAT},{"F2",FLOAT},{"sigma2", FLOAT}}}}
 
     };
 
@@ -331,14 +339,14 @@ int main(int argc, char* argv[])
     {
         {"prefix", STRING}, {"qbmode", STRING}, {"envelope", STRING},
         {"Dstates", INT}, {"ti", FLOAT}, {"tf", FLOAT},
-        {"Nstep", INT}, {"Nprint", INT}, {"psi", ARRAY}
+        {"Nstep", INT}, {"Nprint", INT}, {"psi", ARRAY}, {"wl", ARRAY}, {"wr", MATRIX}, {"w1", FLOAT}
     };
 
-    //allowed dimensions
-    std::unordered_map<int,std::pair<std::string, std::string>> dimensions = 
-    {
-        {1,{"off","off"}},{2,{"off","off"}},{3,{"off","off"}},{4,{"off","off"}}
-    };
+    // //allowed dimensions
+    // std::unordered_map<int,std::pair<std::string, std::string>> dimensions = 
+    // {
+    //     {1,{"off","off"}},{2,{"off","off"}},{3,{"off","off"}},{4,{"off","off"}}
+    // };
 
     //check if specified qbmode is supported
     if (qbmodes.find(qbmode) == qbmodes.end()) 
@@ -352,12 +360,13 @@ int main(int argc, char* argv[])
         std::cerr << "The specified envelope '" << envelope << "' is not supported!\n";
         return 1;
     }
-    //check if specified dimension is supported
-    if (dimensions.find(dimension) == dimensions.end()) 
-    {
-        std::cerr << "The specified dimension '" << dimension << "' is not supported!\n";
-        return 1;
-    }
+
+    // //check if specified dimension is supported
+    // if (dimensions.find(dimension) == dimensions.end()) 
+    // {
+    //     std::cerr << "The specified dimension '" << dimension << "' is not supported!\n";
+    //     return 1;
+    // }
 
     std::string potential;
     potential = envelope + ":" + qbmode ;
@@ -378,7 +387,24 @@ int main(int argc, char* argv[])
     }
 
     //start simulation
+    std::cout << "Starting the calculation with prefix '" << input["prefix"] << "'...\n";
+
+    clock_t tStart = clock();
     qbmodes[qbmode](input,  potentials[potential], envelopes[envelope].first);
+    
+
+    clock_t tEnd = clock();
+
+    double took = (double)(tEnd-tStart)/CLOCKS_PER_SEC; 
+
+
+    time(&timestamp);
+    std::cout << "qqEvol execution terminated: " << ctime(&timestamp) << "\n";
+
+    std::cout << "The calculation took: " << took << "s\n";
+
+
     return 0;
 }
+
 
