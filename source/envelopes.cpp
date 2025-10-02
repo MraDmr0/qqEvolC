@@ -1,9 +1,10 @@
 #include "envelopes.h"
 #include <iostream>
 #include <cmath> 
+#include <vector>
 
 //potential constant and equal to 0
-void off(const json& input, double* tvec, double* env, double* env2)
+void off(const json& input, double* tvec, std::vector<double>& env, std::vector<double>& env2)
 {
     for (int k = 0; k < 3; k++)
     {
@@ -12,7 +13,7 @@ void off(const json& input, double* tvec, double* env, double* env2)
 }
 
 //potential constant and equal to F1
-void constant(const json& input, double* tvec, double* env, double* env2)
+void constant(const json& input, double* tvec, std::vector<double>& env, std::vector<double>& env2)
 {
     
     double F1 = input["F1"];
@@ -24,7 +25,7 @@ void constant(const json& input, double* tvec, double* env, double* env2)
 }
 
 //square potential between t1 and t2 equal to F1
-void impulse(const json& input, double* tvec, double* env, double* env2)
+void impulse(const json& input, double* tvec, std::vector<double>& env, std::vector<double>& env2)
 {
     
     double F1 = input["F1"];
@@ -44,7 +45,7 @@ void impulse(const json& input, double* tvec, double* env, double* env2)
     }
 }
 
-void double_impulse(const json& input, double* tvec, double* env, double* env2)
+void double_impulse(const json& input, double* tvec, std::vector<double>& env, std::vector<double>& env2)
 {
     
     double F1 = input["F1"];
@@ -81,7 +82,7 @@ void double_impulse(const json& input, double* tvec, double* env, double* env2)
 }
 
 //gussian potential centered in t1, strength F1 and amplitude sigma1
-void gauss(const json& input, double* tvec, double* env, double* env2)
+void gauss(const json& input, double* tvec, std::vector<double>& env, std::vector<double>& env2)
 {
     
     double F1 = input["F1"];
@@ -96,7 +97,7 @@ void gauss(const json& input, double* tvec, double* env, double* env2)
 }
 
 
-void double_gauss(const json& input, double* tvec, double* env, double* env2)
+void double_gauss(const json& input, double* tvec, std::vector<double>& env, std::vector<double>& env2)
 {
     
     double F1 = input["F1"];

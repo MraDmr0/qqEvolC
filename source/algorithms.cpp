@@ -18,14 +18,23 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
     double ti    = input["ti"];
     double tf    = input["tf"];
     //dynamically allocate memory for structured input data 
-    double* wl = new double[D];
-    std::complex<double>* psi0 = new std::complex<double>[D];
+ 
+    std::vector<double> wl(D);
+    std::vector<std::complex<double>> psi0(D);
+    std::vector<std::complex<double>> wr(D*D);
+
+     //dynamically define local variables
+    std::vector<std::complex<double>> psiPrev(D);
+    std::vector<std::complex<double>> psiCurr(D);
+    std::vector<std::complex<double>> K0(D);
+    std::vector<std::complex<double>> K1(D);
+    std::vector<std::complex<double>> K2(D);
+    std::vector<std::complex<double>> K3(D);
     
-    std::complex<double>** wr = new std::complex<double>*[D];
-    for (int k = 0; k < D ; k++)
-    {
-        wr[k] = new std::complex<double>[D];
-    }
+    //allocate array for envelope function
+    std::vector<double> env(3,0);
+    std::vector<double> env2(3,0);
+
 
     for (int k = 0; k < D ; k++)
     {
@@ -34,38 +43,22 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
 
         for (int j = 0; j < D ; j++)
         {
-            wr[k][j] = std::complex<double>(input["wr"][k][j],0.0);
+            wr[k*D + j] = std::complex<double>(input["wr"][k][j],0.0);
         }
     }
+
+
     //allocate vector for time array
-    double* t   = new double[Nstep+1];
+    std::vector<double> t(Nstep+1);
     //compute time step
     double dt = (tf-ti)/(double)(Nstep);
     //fill the time array
     t[0] = ti;
     for (int i = 1; i < Nstep+1; i++)
     {
-        t[i] = i*dt;
+        t[i] = ti + i*dt;
     }
-    //dynamically define local variables
-    std::complex<double>* psiPrev = new std::complex<double>[D];
-    std::complex<double>* psiCurr = new std::complex<double>[D];
-    std::complex<double>** psiOut = new std::complex<double>*[D];
-    std::complex<double>* K0 = new std::complex<double>[D];
-    std::complex<double>* K1 = new std::complex<double>[D];
-    std::complex<double>* K2 = new std::complex<double>[D];
-    std::complex<double>* K3 = new std::complex<double>[D];
-    
-    //allocate array for envelope function
-    double* env = new double[3];
-    double* env2 = new double[3];
-
-    for (int k = 0; k < 3; k++)
-    {
-        env[k] = 0.0;
-        env2[k] = 0.0;
-
-    }
+   
     //compute how many points are printed in output
     int Nsave;
     if (Nstep%Nprint != 0.0) 
@@ -76,34 +69,25 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
     {
         Nsave = Nstep/Nprint + 1;
     }
+
+    std::vector<std::complex<double>> psiOut((Nsave+1)*D);
+
     //allocate potential matrix
-    std::complex<double>** Vmatrices = new std::complex<double>*[3];
-    for (int i = 0; i < 3; i++) 
-    {
-        Vmatrices[i] = new std::complex<double>[D * D];
-    }
+    std::vector<std::vector<std::complex<double>>> Vmatrices(3, std::vector<std::complex<double>>(D*D));
 
     //allocate output time and envelope array
-    double* tOut = new double[Nsave+1];
-    double* envOut = new double [Nsave+1];
-    for (int k = 0; k < D; k++)
-    {
-        psiOut[k] = new std::complex<double>[Nsave+1];
-    }
+    std::vector<double> tOut(Nsave+1,0);
+    std::vector<double> envOut(Nsave+1,0);
     
     //initialize arrays
-    for (int i = 0; i < Nsave; i++)
-    {
-        envOut[i] = 0.0;
-        tOut[i]   = 0.0;
-    }
+   
     tOut[0] = ti;
 
     for (int k = 0; k < D; k++)
     {
         psiPrev[k]   = psi0[k];
         psiCurr[k]   = psi0[k];
-        psiOut[k][0] = psi0[k];  
+        psiOut[k] = psi0[k];  
     }
     //compute envelope at initial time for output
     potential(input, D, t[0], dt,  wl,  wr,  envelope,  Vmatrices , env, env2);
@@ -126,44 +110,37 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
             }
         }
 
-        //compute K1
-        for (int j = 0; j < D; ++j) 
-        {
-            psiCurr[j] = psiPrev[j] + 0.5 * dt * K0[j];
-        }
+      
+        
         for (int j = 0; j < D; ++j) {
 
             K1[j] = std::complex<double>(0.0, 0.0);
             for (int k = 0; k < D; ++k) 
             {
+                psiCurr[k] = psiPrev[k] + 0.5 * dt * K0[k];
                 K1[j] += Vmatrices[1][j * D + k] * psiCurr[k];
             }
         }
 
-        //compute K2
-        for (int j = 0; j < D; ++j) 
-        {
-            psiCurr[j] = psiPrev[j] + 0.5 * dt * K1[j];
-        }
+    
         for (int j = 0; j < D; ++j) 
         {
             K2[j] = std::complex<double>(0.0, 0.0);
             for (int k = 0; k < D; ++k) 
             {
+                psiCurr[k] = psiPrev[k] + 0.5 * dt * K1[k];
                 K2[j] += Vmatrices[1][j * D + k] * psiCurr[k];
             }
         }
 
         //compute K3
-        for (int j = 0; j < D; ++j) 
-        {
-            psiCurr[j] = psiPrev[j] + dt * K2[j];
-        }
+    
         for (int j = 0; j < D; ++j) 
         {
             K3[j] = std::complex<double>(0.0, 0.0);
             for (int k = 0; k < D; ++k) 
             {
+                psiCurr[k] = psiPrev[k] + dt * K2[k];
                 K3[j] += Vmatrices[2][j * D + k] * psiCurr[k];
             }
         }
@@ -175,12 +152,16 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
         }
 
         // Normalization
-        std::complex<double> norm = 0.0;
-        for (int j = 0; j < D; ++j) 
-        {
-            norm += std::conj(psiPrev[j]) * psiPrev[j];
-        }
-        norm = std::sqrt(norm);
+        
+        double norm = std::sqrt(
+        std::accumulate(
+                psiPrev.begin(), psiPrev.end(), 0.0,
+                [](double sum, const std::complex<double>& z) {
+                    return sum + std::norm(z); // somma dei quadrati dei moduli
+                }
+            )
+        );
+        
         for (int j = 0; j < D; ++j) 
         {
             psiPrev[j] /= norm;
@@ -196,7 +177,7 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
 
             for (int j = 0; j < D; ++j) 
             {
-                psiOut[j][idx] = psiPrev[j];
+                psiOut[idx*D + j] = psiPrev[j];
             }
             envOut[idx]    = env[2];
             tOut[idx] = t[i];
@@ -214,14 +195,16 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
     std::string outfile = prefix + ".txt"; 
 
 
+
     //print out result
     FILE* f = std::fopen(outfile.c_str(), "w");
 if (!f) { std::cerr<<"fopen failed\n"; }
 else {
+
     for (int i = 0; i < Nsave; ++i) {
         std::fprintf(f, "%g %g ", tOut[i], envOut[i]);
         for (int k = 0; k < D; ++k) {
-            std::fprintf(f, "%g+%gj ", std::real(psiOut[k][i]), std::imag(psiOut[k][i]));
+            std::fprintf(f, "%g+%gj ", std::real(psiOut[i*D + k]), std::imag(psiOut[i*D + k]));
         }
         std::fprintf(f, "\n");
     }
@@ -270,38 +253,6 @@ else {
     //      std::cout << "\n";
     //  }
 
-    //Erase dynamically allocated memory
-    delete [] t;
-    delete [] tOut;
-    delete [] psiPrev;
-    delete [] psiCurr;
-    delete [] K0;
-    delete [] K1;
-    delete [] K2;
-    delete [] K3;
-    for (int k = 0; k < D; k++)
-    {
-        delete [] psiOut[k];
-        delete[] wr[k];
-    }
-    delete [] psiOut;
-    delete [] psi0;
-    delete [] envOut;
-    delete [] wr;
-    delete [] wl; 
-    for (int i = 0; i < 3; ++i) 
-    {
-        delete[] Vmatrices[i];
-    }
-    delete[] Vmatrices;
-    delete[] env;
-    delete[] env2;
 
 }
-
-
-
-
-
-
 

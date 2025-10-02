@@ -11,9 +11,9 @@
 #include <iostream>
 #include <fstream>
 #include <unordered_map>
-#include <vector>
 #include <string>
 #include <complex>
+#include <vector>
 #include <ctime>
 #include "json.hpp"
 #include "algorithms.h"
@@ -387,7 +387,7 @@ int main(int argc, char* argv[])
     }
 
     //start simulation
-    std::cout << "Starting the calculation with prefix '" << input["prefix"] << "'...\n";
+    std::cout << "Starting the calculation with prefix " << input["prefix"] << "...\n";
 
     clock_t tStart = clock();
     qbmodes[qbmode](input,  potentials[potential], envelopes[envelope].first);

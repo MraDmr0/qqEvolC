@@ -1,18 +1,15 @@
 #include "potentials.h"
 #include <iostream>
 #include <complex>
+#include <vector>
 
 
 const double hbar = 6.582119569e-13;
 
 //update potential matrix for qbmode = off
-void UpdatePotential(const json& input, int D, double t, double dt, double* wl, std::complex<double>** wr, EnvelopeFunction envelope, std::complex<double>** Vmatrices , double* env, double* env2)
+void UpdatePotential(const json& input, int D, double t, double dt, std::vector<double>& wl, std::vector<std::complex<double>>& wr, EnvelopeFunction envelope, std::vector<std::vector<std::complex<double>>>& Vmatrices , std::vector<double>& env, std::vector<double>& env2)
 {
     //env should be a vector with envelope function at times [t, t + 0.5dt, t+dt] 
-    assert(env != nullptr);
-    assert(Vmatrices != nullptr);
-    assert(wl != nullptr);
-    assert(wr != nullptr);
 
     double w1 = input["w1"];
     std::complex<double> im;
@@ -32,7 +29,7 @@ void UpdatePotential(const json& input, int D, double t, double dt, double* wl, 
         {
             for (int j = 0; j < D; j++) 
             {
-                Vmatrices[k][i*D + j] = -im*env[k]*wr[i][j] * std::exp((im/hbar)*(wl[i]-wl[j])*tvec[k])*std::cos(w1*tvec[k]);
+                Vmatrices[k][i*D + j] = -im*env[k]*wr[i*D + j] * std::exp((im/hbar)*(wl[i]-wl[j])*tvec[k])*std::cos(w1*tvec[k]);
             }
         }
     }
@@ -40,13 +37,13 @@ void UpdatePotential(const json& input, int D, double t, double dt, double* wl, 
     
 }
 
-void UpdatePotential2(const json& input, int D, double t, double dt, double* wl, std::complex<double>** wr, EnvelopeFunction envelope, std::complex<double>** Vmatrices , double* env, double* env2)
+void UpdatePotential2(const json& input, int D, double t, double dt, std::vector<double>& wl, std::vector<std::complex<double>>& wr, EnvelopeFunction envelope, std::vector<std::vector<std::complex<double>>>& Vmatrices ,std::vector<double>& env, std::vector<double>& env2)
 {
     //env should be a vector with envelope function at times [t, t + 0.5dt, t+dt] 
-    assert(env != nullptr);
-    assert(Vmatrices != nullptr);
-    assert(wl != nullptr);
-    assert(wr != nullptr);
+    //assert(env != nullptr);
+   // assert(Vmatrices != nullptr);
+    //assert(wl != nullptr);
+    //assert(wr != nullptr);
 
     double w1 = input["w1"];
     double w2 = input["w2"];
@@ -74,8 +71,8 @@ void UpdatePotential2(const json& input, int D, double t, double dt, double* wl,
         {
             for (int j = 0; j < D; j++) 
             {
-                Vmatrices1[k][i*D + j] = -im*env[k]*wr[i][j] * std::exp((im/hbar)*(wl[i]-wl[j])*tvec[k])*std::cos(w1*tvec[k]);
-                Vmatrices[k][i*D + j] = -im*env2[k]*wr[i][j] * std::exp((im/hbar)*(wl[i]-wl[j])*tvec[k])*std::cos(w2*tvec[k])+ Vmatrices1[k][i*D+j];
+                Vmatrices1[k][i*D + j] = -im*env[k]*wr[i*D + j] * std::exp((im/hbar)*(wl[i]-wl[j])*tvec[k])*std::cos(w1*tvec[k]);
+                Vmatrices[k][i*D + j] = -im*env2[k]*wr[i*D + j] * std::exp((im/hbar)*(wl[i]-wl[j])*tvec[k])*std::cos(w2*tvec[k])+ Vmatrices1[k][i*D+j];
             }
         }
     }
