@@ -66,7 +66,7 @@ The input parameters can be specified in a JSON file. You need to specify a set 
 The executable outputs a file "prefix.txt" which contains, at each time step saved, the following data:
 * time ($\mu s$)
 * value of envelope function
-* wave-function of each energy level
+* occupation probability of each energy level
 
 ## Utilities
 The package includes a Python script "Plot.py" that allows to easily plot the occupation probability and the envelope shape as a function of time:
