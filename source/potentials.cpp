@@ -50,13 +50,13 @@ void UpdatePotential2(const json& input, int D, double t, double dt, std::vector
     std::complex<double> im;
     im = std::complex<double>(0.0, 1.0);
 
+    std::vector<std::vector<std::complex<double>>> Vmatrices1(3, std::vector<std::complex<double>>(D*D));
+    //std::complex<double>** Vmatrices1 = new std::complex<double>*[3];
     
-    std::complex<double>** Vmatrices1 = new std::complex<double>*[3];
-    
-    for (int i = 0; i < 3; i++) 
-    {
-        Vmatrices1[i] = new std::complex<double>[D * D];
-    }
+    // for (int i = 0; i < 3; i++) 
+    // {
+    //     Vmatrices1[i] = new std::complex<double>[D * D];
+    // }
     
     double tvec[3];
     tvec[0] = t;
@@ -78,11 +78,11 @@ void UpdatePotential2(const json& input, int D, double t, double dt, std::vector
     }
 
     env[2] += env2[2];
-    for (int i = 0; i < 3; ++i) 
-    {
-        delete[] Vmatrices1[i];
-    }
-    delete[] Vmatrices1;
+    // for (int i = 0; i < 3; ++i) 
+    // {
+    //     delete[] Vmatrices1[i];
+    // }
+    // delete[] Vmatrices1;
  
 
 }

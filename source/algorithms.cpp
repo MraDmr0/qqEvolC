@@ -12,33 +12,35 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
 {
     //Assign base input data to local variables
     std::string prefix = input["prefix"];
-    int Nstep    = input["Nstep"];
-    int D        = input["Dstates"];
-    int Nprint   = input["Nprint"];
-    double ti    = input["ti"];
-    double tf    = input["tf"];
+    int Nstep          = input["Nstep"];
+    int D              = input["Dstates"];
+    int Nprint         = input["Nprint"];
+    double ti          = input["ti"];
+    double tf          = input["tf"];
     //dynamically allocate memory for structured input data 
  
     std::vector<double> wl(D);
     std::vector<std::complex<double>> psi0(D);
     std::vector<std::complex<double>> wr(D*D);
 
-     //dynamically define local variables
-    std::vector<std::complex<double>> psiPrev(D);
-    std::vector<std::complex<double>> psiCurr(D);
-    std::vector<std::complex<double>> K0(D);
-    std::vector<std::complex<double>> K1(D);
-    std::vector<std::complex<double>> K2(D);
-    std::vector<std::complex<double>> K3(D);
-    
+    //dynamically define local variables
+    std::vector<std::complex<double>> psiPrev(D, std::complex<double>(0.0, 0.0));
+    std::vector<std::complex<double>> psiCurr(D, std::complex<double>(0.0, 0.0));
+    std::vector<std::complex<double>> K0(D, 0.0);
+    std::vector<std::complex<double>> K1(D, 0.0);
+    std::vector<std::complex<double>> K2(D, 0.0);
+    std::vector<std::complex<double>> K3(D, 0.0);
+        
     //allocate array for envelope function
     std::vector<double> env(3,0);
     std::vector<double> env2(3,0);
 
-
     for (int k = 0; k < D ; k++)
     {
         psi0[k] = std::complex<double>(input["psi"][k],0.0);
+        psiPrev[k]   = psi0[k];
+        psiCurr[k]   = psi0[k]; 
+
         wl[k]   = input["wl"][k];
 
         for (int j = 0; j < D ; j++)
@@ -47,53 +49,32 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
         }
     }
 
-
     //allocate vector for time array
     std::vector<double> t(Nstep+1);
     //compute time step
     double dt = (tf-ti)/(double)(Nstep);
     //fill the time array
-    t[0] = ti;
-    for (int i = 1; i < Nstep+1; i++)
+    for (int i = 0; i < (int)(t.size()); i++)
     {
         t[i] = ti + i*dt;
     }
-   
-    //compute how many points are printed in output
-    int Nsave;
-    if (Nstep%Nprint != 0.0) 
-    {
-        Nsave = Nstep/Nprint + 2;
-    }
-    else
-    {
-        Nsave = Nstep/Nprint + 1;
-    }
 
-    std::vector<std::complex<double>> psiOut((Nsave+1)*D);
+    std::vector<std::vector<std::complex<double>>> psiOut;
 
     //allocate potential matrix
     std::vector<std::vector<std::complex<double>>> Vmatrices(3, std::vector<std::complex<double>>(D*D));
 
     //allocate output time and envelope array
-    std::vector<double> tOut(Nsave+1,0);
-    std::vector<double> envOut(Nsave+1,0);
+    std::vector<double> tOut;
+    std::vector<double> envOut;
     
     //initialize arrays
    
-    tOut[0] = ti;
-
-    for (int k = 0; k < D; k++)
-    {
-        psiPrev[k]   = psi0[k];
-        psiCurr[k]   = psi0[k];
-        psiOut[k] = psi0[k];  
-    }
+    tOut.push_back(ti);
+    psiOut.push_back(psi0);
     //compute envelope at initial time for output
     potential(input, D, t[0], dt,  wl,  wr,  envelope,  Vmatrices , env, env2);
-    envOut[0] = env[2] + env2[2];
-    //index for output data
-    int idx = 1;
+    envOut.push_back(env[0] + env2[0]);
 
     for (int i = 1; i < Nstep+1 ; i++)
     {
@@ -110,8 +91,6 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
             }
         }
 
-      
-        
         for (int j = 0; j < D; ++j) {
 
             K1[j] = std::complex<double>(0.0, 0.0);
@@ -122,7 +101,6 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
             }
         }
 
-    
         for (int j = 0; j < D; ++j) 
         {
             K2[j] = std::complex<double>(0.0, 0.0);
@@ -161,7 +139,10 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
                 }
             )
         );
-        
+        if (norm == 0.0 || std::isnan(norm) || std::isinf(norm)) {
+            std::cerr << "Warning: invalid norm at step " << i << "\n";
+            norm = 1.0;
+        }
         for (int j = 0; j < D; ++j) 
         {
             psiPrev[j] /= norm;
@@ -170,89 +151,35 @@ void EvolveRK4(const json& input, PotentialFunction potential, EnvelopeFunction 
         // Save every Nprint
         if (i % Nprint == 0 || i == Nstep) 
         {
-        if (idx >= Nsave) {
-            std::cerr << "ERROR: idx=" << idx << " >= Nsave=" << Nsave << "\n";
-            std::abort();
-        }
-
-            for (int j = 0; j < D; ++j) 
-            {
-                psiOut[idx*D + j] = psiPrev[j];
-            }
-            envOut[idx]    = env[2];
-            tOut[idx] = t[i];
-            idx += 1;
+            psiOut.push_back(psiPrev);
+            envOut.push_back(env[2]);
+            tOut.push_back(t[i]);
         }
 
     }
 
     std::cout << "Calculation completed...\n";
 
-    std::cout << "Writing output file...\n";
-
-
 
     std::string outfile = prefix + ".txt"; 
 
-
-
+    std::cout << "Writing output file...\n";
+    
     //print out result
     FILE* f = std::fopen(outfile.c_str(), "w");
 if (!f) { std::cerr<<"fopen failed\n"; }
 else {
 
-    for (int i = 0; i < Nsave; ++i) {
+    for (int i = 0; i < (int)(tOut.size()); ++i) {
         std::fprintf(f, "%g %g ", tOut[i], envOut[i]);
         for (int k = 0; k < D; ++k) {
-            std::fprintf(f, "%g+%gj ", std::real(psiOut[i*D + k]), std::imag(psiOut[i*D + k]));
+            std::fprintf(f, "%g+%gj ", std::real(psiOut[i][k]), std::imag(psiOut[i][k]));
         }
         std::fprintf(f, "\n");
     }
     std::fclose(f);
 }
 
-
     std::cout << "Output file written correctly...\n";
 
-
-
-    // std::cerr << outfile << "\n";
-
-    // std::ofstream write_output(outfile);
-    
-    // std::cerr << write_output.is_open() << "\n";
-
-    // if (!write_output.is_open()) {
-    //     std::cerr << "Error: could not open " << outfile << " for writing." << std::endl;
-    // }
-
-    // std::cerr << "Writing \n";
-
-
-    // for (int i = 0; i < Nsave; i++) {
-    //     write_output << tOut[i] << " " << envOut[i] << " ";
-    //     for (int k = 0; k < D; k++) {
-    //         write_output << std::real(psiOut[k][i]) 
-    //                     << "+" 
-    //                     << std::imag(psiOut[k][i]) 
-    //                     << "j ";
-    //     }
-    //     write_output << "\n";
-    // }
-    // write_output.flush();
-
-    // write_output.close();
-
-    //  for (int i = 0; i < Nsave; i++)
-    //  {
-    //      std::cout << tOut[i]<<" " << envOut[i] << " ";
-    //      for (int k = 0; k < D; k++)
-    //      {
-    //          std::cout << real( psiOut[k][i]) << "+" << imag( psiOut[k][i]) << "j"<< " ";
-    //      }
-    //      std::cout << "\n";
-    //  }
-
-
 }
-

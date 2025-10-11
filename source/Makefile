@@ -7,7 +7,7 @@ COMMONDIR=./common
 ifeq ($(COMP),gnu)
 CC=gcc
 CXX=g++                  # <--- importante!
-CCFLAGS=-g -O2 -march=native -Wall -I$(COMMONDIR) -DNDEBUG
+CCFLAGS=-g -O4 -std=c++17 -march=native -Wall -I$(COMMONDIR) -DNDEBUG
 LDFLAGS=
 LIBS=
 endif
@@ -31,4 +31,4 @@ $(EXE): $(OBJS)
 
 .PHONY: clean
 clean:
-	del /Q $(EXE) $(OBJS) *.o *.png *~ 2>nul || exit 0
+	-rm -f $(EXE) $(OBJS) *.o *.png *~

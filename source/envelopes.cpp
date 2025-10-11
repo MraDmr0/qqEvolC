@@ -3,6 +3,8 @@
 #include <cmath> 
 #include <vector>
 
+# define M_PPI           3.14159265358979323846  /* pi */
+
 //potential constant and equal to 0
 void off(const json& input, double* tvec, std::vector<double>& env, std::vector<double>& env2)
 {
@@ -20,6 +22,7 @@ void constant(const json& input, double* tvec, std::vector<double>& env, std::ve
     for (int k = 0; k < 3; k++)
     {
         env[k] = F1;
+        env2[k] = 0;
     }
     
 }
@@ -91,7 +94,7 @@ void gauss(const json& input, double* tvec, std::vector<double>& env, std::vecto
 
     for (int k = 0; k < 3; k++)
     {
-        env[k] = F1/(std::sqrt(2.0*M_PI)*sigma1)*std::exp(-pow((tvec[k]-t1)*1.0e6/sigma1,2.0)/2.0);
+        env[k] = F1/(std::sqrt(2.0*M_PPI)*sigma1)*std::exp(-pow((tvec[k]-t1)*1.0e6/sigma1,2.0)/2.0);
     }
 
 }
@@ -111,8 +114,8 @@ void double_gauss(const json& input, double* tvec, std::vector<double>& env, std
 
     for (int k = 0; k < 3; k++)
     {
-        env[k] = F1/(std::sqrt(2.0*M_PI)*sigma1)*std::exp(-pow((tvec[k]-t1)*1.0e6/sigma1,2.0)/2.0);
-        env2[k] = F2/(std::sqrt(2.0*M_PI)*sigma2)*std::exp(-pow((tvec[k]-t2)*1.0e6/sigma2,2.0)/2.0);
+        env[k] = F1/(std::sqrt(2.0*M_PPI)*sigma1)*std::exp(-pow((tvec[k]-t1)*1.0e6/sigma1,2.0)/2.0);
+        env2[k] = F2/(std::sqrt(2.0*M_PPI)*sigma2)*std::exp(-pow((tvec[k]-t2)*1.0e6/sigma2,2.0)/2.0);
 
     }
 
