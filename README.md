@@ -19,7 +19,7 @@ The current version supports the following envelope functions (for further detai
 The source code can be compiled trough the existing Makefile by running the command:
 
 ```bash
-$ make.
+make.
 
 ```
 
@@ -27,7 +27,7 @@ This will produce the executable "main" that than can be used as:
 
 ```bash
 
-$ ./main.exe input.json > output.
+./main.exe input.json > output.
 
 ```
 
@@ -79,7 +79,7 @@ The executable outputs a file "prefix.txt" which contains, at each time step sav
 The package includes a Python script "Plot.py" that allows to easily plot the occupation probability and the envelope shape as a function of time:
 
 ```bash
-$python Plot.py prefix.
+python Plot.py prefix.
 ```
 
 ## Next developments
