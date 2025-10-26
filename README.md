@@ -18,11 +18,18 @@ The current version supports the following envelope functions (for further detai
 ## Use
 The source code can be compiled trough the existing Makefile by running the command:
 
+```bash
 $ make.
+
+```
 
 This will produce the executable "main" that than can be used as:
 
+```bash
+
 $ ./main.exe input.json > output.
+
+```
 
 ! Note: currently, the Makefile only supports the GNU (g++) compiler. Different compilers can be easily integrated in the existing Makefile. 
 
@@ -71,7 +78,9 @@ The executable outputs a file "prefix.txt" which contains, at each time step sav
 ## Utilities
 The package includes a Python script "Plot.py" that allows to easily plot the occupation probability and the envelope shape as a function of time:
 
+```bash
 $python Plot.py prefix.
+```
 
 ## Next developments
 The current Ver. 1.0 implements the basic functions of the package. However, the code and the repository can be further developed from many points of view:
